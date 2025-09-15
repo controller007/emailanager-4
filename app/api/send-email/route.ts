@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
       html: htmlContent,
       tags: [
         {
-          name: " emailHistoryId",
-          value: emailHistory.id,
+          name: "emailHistoryId",
+          value: emailHistory.id.toString(),
         },
       ],
     });
