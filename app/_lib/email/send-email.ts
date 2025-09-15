@@ -1,3 +1,6 @@
+import { Resend } from "resend"
+import { emailConfig, generateEmailTemplate } from "./resend-client"
+
 export default async function sendEmail(
   to: string,
   subject: string,
@@ -37,12 +40,8 @@ export default async function sendEmail(
       throw new Error(error.message)
     }
 
-    console.log("Email sent successfully with Resend")
+    // console.log("Email sent successfully with Resend")
 
-    // If save is true, save to sent folder using the existing IMAP functionality
-    if (save) {
-      await saveToSentFolder({ ...message, html })
-    }
 
     return { success: true, message: "Email sent and saved successfully", id: data?.id }
   } catch (error) {

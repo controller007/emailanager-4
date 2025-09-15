@@ -92,14 +92,7 @@ export async function POST(request: NextRequest) {
           resendIds: data?.id ? [data.id] : [],
         },
       }),
-      prisma.emailRecipient.createMany({
-        data: contactList.emails.map((email) => ({
-          email,
-          resendBatchId: data?.id ?? "",
-          emailHistoryId: emailHistory.id,
-          status: "sent",
-        })),
-      }),
+    
     ]);
 
     return NextResponse.json({

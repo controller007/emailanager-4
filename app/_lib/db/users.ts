@@ -27,10 +27,10 @@ export async function CreateUser(userData: {
   })
 }
 
-export async function GetAdmins(): Promise<User[]> {
-  return await prisma.user.findMany({
-    where: {
-      admin: true,
-    },
-  })
-}
+// export async function GetAdmins(): Promise<User[]> {
+//   return await prisma.user.findMany({
+//     where: {
+//       admin: true,
+//     },
+//   })
+// }
