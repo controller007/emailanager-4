@@ -11,7 +11,7 @@ export const emailConfig = {
   fromName: process.env.EMAIL_FROM_NAME || "Email Management Platform",
 }
 
-export function generateEmailTemplate(content: string, subject: string): string {
+export function generateEmailTemplate(content: string, subject: string, domainName = emailConfig.fromName): string {
   return `
     <!DOCTYPE html>
     <html>
@@ -20,92 +20,62 @@ export function generateEmailTemplate(content: string, subject: string): string 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${subject}</title>
         <style>
-          body { 
+          body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6; 
-            color: #333; 
             margin: 0;
             padding: 0;
-            background-color: #f8f9fa;
+            background-color: #f1f5f9;
+            color: #111827;
           }
-          .container { 
-            max-width: 600px; 
-            margin: 0 auto; 
-            background-color: #ffffff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #f8fcff;
           }
-          .header { 
-            background-color: #2563eb;
-            color: white;
-            padding: 20px;
-            text-align: center;
+          .content {
+            padding: 32px 24px;
           }
-          .header h1 {
-            margin: 0;
-            font-size: 24px;
+          .content h1 {
+            margin: 0 0 16px 0;
+            font-size: 20px;
             font-weight: 600;
+            color: #111827;
           }
-          .content { 
-            padding: 30px;
+          .content p {
+            margin: 0 0 16px 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
           }
-          .footer { 
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef; 
-            padding: 20px; 
-            text-align: center;
-            font-size: 12px; 
-            color: #6c757d; 
-          }
-          .footer a {
+          .content a {
             color: #2563eb;
-            text-decoration: none;
+            text-decoration: underline;
           }
-          /* Rich text editor styles */
-          .content h1, .content h2, .content h3 { color: #1f2937; margin-top: 0; }
-          .content p { margin-bottom: 16px; }
-          .content ul, .content ol { margin-bottom: 16px; padding-left: 20px; }
-          .content blockquote { 
-            border-left: 4px solid #2563eb; 
-            margin: 16px 0; 
-            padding-left: 16px; 
-            font-style: italic;
-            color: #6b7280;
+          .footer {
+            background-color: #0080ff;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
           }
-          .content img { max-width: 100%; height: auto; border-radius: 8px; }
-          .content a { color: #2563eb; text-decoration: underline; }
-          .content table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 16px 0; 
-          }
-          .content table th, .content table td { 
-            border: 1px solid #e5e7eb; 
-            padding: 8px 12px; 
-            text-align: left; 
-          }
-          .content table th { 
-            background-color: #f9fafb; 
-            font-weight: 600; 
+          .footer p {
+            margin: 4px 0;
           }
         </style>
       </head>
       <body>
         <div class="container">
-          <div class="header">
-            <h1>${subject}</h1>
-          </div>
           <div class="content">
+            <h1>${subject}</h1>
             ${content}
           </div>
           <div class="footer">
-            <p>This email was sent from Email Management Platform</p>
-            <p>
-              <a href="#" style="color: #2563eb;">Unsubscribe</a> | 
-              <a href="#" style="color: #2563eb;">Update Preferences</a>
-            </p>
+            <p>${domainName}</p>
+            <p>Copyright © ${new Date().getFullYear()} All rights reserved</p>
           </div>
         </div>
       </body>
     </html>
-  `
+  `;
 }
+

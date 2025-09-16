@@ -8,6 +8,10 @@ import {
 } from "@/app/_lib/email/resend-client";
 import prisma from "@/app/_lib/db/prisma";
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession();
@@ -44,7 +48,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create email history record
     const emailHistory = await prisma.emailHistory.create({
       data: {
         subject,
@@ -57,52 +60,56 @@ export async function POST(request: NextRequest) {
     const htmlContent = generateEmailTemplate(emailBody, subject);
     const fromEmail = `${emailConfig.fromName} <${emailConfig.user}>`;
 
-    // Send email batch
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to: contactList.emails,
-      subject,
-      html: htmlContent,
-      tags: [
-        {
-          name: "emailHistoryId",
-          value: emailHistory.id.toString(),
-        },
-      ],
-    });
+    let successCount = 0;
+    let failedCount = 0;
+    const resendIds: string[] = [];
 
-    if (error) {
-      console.error("Failed to send bulk email:", error);
-      await prisma.emailHistory.update({
-        where: { id: emailHistory.id },
-        data: { failedCount: contactList.emails.length },
-      });
-      return NextResponse.json(
-        { error: "Failed to send emails" },
-        { status: 500 }
-      );
+    for (const recipient of contactList.emails) {
+      try {
+        const { data, error } = await resend.emails.send({
+          from: fromEmail,
+          to: recipient,
+          subject,
+          html: htmlContent,
+          tags: [
+            {
+              name: "emailHistoryId",
+              value: emailHistory.id.toString(),
+            },
+          ],
+        });
+
+        if (error) {
+          console.error(`Failed to send email to ${recipient}:`, error);
+          failedCount++;
+        } else {
+          successCount++;
+          if (data?.id) resendIds.push(data.id);
+        }
+      } catch (err) {
+        console.error(`Error sending to ${recipient}:`, err);
+        failedCount++;
+      }
+
+      await sleep(100);
     }
 
-    // Save recipients + update counts
-    await prisma.$transaction([
-      prisma.emailHistory.update({
-        where: { id: emailHistory.id },
-        data: {
-          sentCount: contactList.emails.length,
-          resendIds: data?.id ? [data.id] : [],
-        },
-      }),
-    
-    ]);
+    await prisma.emailHistory.update({
+      where: { id: emailHistory.id },
+      data: {
+        sentCount: successCount,
+        failedCount,
+        resendIds,
+      },
+    });
 
     return NextResponse.json({
       success: true,
       emailHistoryId: emailHistory.id,
-      batchId: data?.id,
       recipientCount: contactList.emails.length,
-      successCount: contactList.emails.length,
-      failedCount: 0,
-      message: `Email sent to ${contactList.emails.length} recipients`,
+      successCount,
+      failedCount,
+      message: `Personalized emails sent: ${successCount} success, ${failedCount} failed`,
     });
   } catch (error) {
     console.error("Error sending email:", error);
