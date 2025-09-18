@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       from: fromEmail,
       subject,
       html: htmlContent,
+    
     });
 
     await resend.broadcasts.send(broadcast.data?.id as string)
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
     await prisma.emailHistory.update({
       where: { id: emailHistory.id },
       data: {
-        resendIds: [broadcast.data?.id as string],
+        broadcastId: broadcast.data?.id as string,
         sentCount: contactList.emails.length,
         failedCount: 0,
       },

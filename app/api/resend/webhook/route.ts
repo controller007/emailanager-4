@@ -5,22 +5,21 @@ export async function POST(req: NextRequest) {
   try {
     const event = await req.json()
     const { type, data } = event
-    const { to, tags } = data
+    const { broadcast_id: broadcastId} = data
 
-    const recipientEmail = Array.isArray(to) ? to[0] : to
-    const emailHistoryId = tags?.emailHistoryId
 
-    if (!emailHistoryId) {
-      console.warn("Webhook: Missing emailHistoryId in tags")
+
+    if (!broadcastId) {
+      console.warn("Webhook: Missing broadcast_id ")
       return NextResponse.json({ ok: true })
     }
 
-    const emailHistory = await prisma.emailHistory.findUnique({
-      where: { id: emailHistoryId },
+    const emailHistory = await prisma.emailHistory.findFirst({
+      where: { broadcastId },
     })
 
     if (!emailHistory) {
-      console.warn(`Webhook: No EmailHistory found for id ${emailHistoryId}`)
+      console.warn(`Webhook: No EmailHistory found for id ${broadcastId}`)
       return NextResponse.json({ ok: true })
     }
 
@@ -55,7 +54,7 @@ export async function POST(req: NextRequest) {
       data: updateData,
     })
 
-    console.log(`Webhook updated ${recipientEmail} (emailHistoryId=${emailHistoryId}) → ${recipientStatus}`)
+    console.log(`Webhook updated  (broadCastId=${broadcastId}) → ${recipientStatus}`)
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error("Webhook error:", err)

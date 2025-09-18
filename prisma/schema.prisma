@@ -30,13 +30,13 @@ model User {
 }
 
 model ContactList {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  emails    String[] 
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  emails     String[]
   audienceId String
-  createdBy String   @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdBy  String   @db.ObjectId
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   user         User           @relation(fields: [createdBy], references: [id], onDelete: Cascade)
@@ -51,7 +51,7 @@ model EmailHistory {
   body           String
   contactListId  String   @db.ObjectId
   userId         String   @db.ObjectId
-  resendIds      String[]
+  broadcastId    String?
   sentCount      Int      @default(0)
   deliveredCount Int      @default(0)
   openedCount    Int      @default(0)
