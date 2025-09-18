@@ -4,6 +4,10 @@ import { contactListSchema } from "@/app/_lib/validations/email";
 import prisma from "@/app/_lib/db/prisma";
 import { resend } from "@/app/_lib/email/resend-client";
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession();
@@ -28,22 +32,34 @@ export async function POST(request: NextRequest) {
       name,
     });
 
-    // 2. Create contacts in Resend for each email
-    await Promise.all(
-      emails.map((email: string) =>
-        resend.contacts.create({
+    console.log(audience);
+
+    for (const email of emails) {
+      try {
+        const res = await resend.contacts.create({
           email,
           audienceId: audience.data?.id as string,
-        })
-      )
-    );
+        });
+
+        if (res.error) {
+          console.error(`Failed to add ${email}:`, res.error);
+        } else {
+          console.log(`Added ${email} to audience ${audience.data?.id}`);
+        }
+
+        // Wait 600ms between requests to stay under 2/sec
+        await sleep(600);
+      } catch (err) {
+        console.error(`Error adding ${email}:`, err);
+      }
+    }
 
     const contactList = await prisma.contactList.create({
       data: {
         name,
         emails,
         createdBy: session.user.id,
-        audienceId: audience.data?.id as string, 
+        audienceId: audience.data?.id as string,
       },
     });
 
