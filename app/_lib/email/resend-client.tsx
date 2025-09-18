@@ -66,12 +66,11 @@ export function generateEmailTemplate(content: string, subject: string, domainNa
       <body>
         <div class="container">
           <div class="content">
-            <h1>${subject}</h1>
             ${content}
           </div>
           <div class="footer">
-            <p>${domainName}</p>
-            <p>Copyright © ${new Date().getFullYear()} All rights reserved</p>
+            <p>Brain Decker</p>
+            <p style="font-weight:700">THE WEALTH SOCIETY</p>
           </div>
         </div>
       </body>

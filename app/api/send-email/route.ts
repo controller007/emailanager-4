@@ -8,10 +8,6 @@ import {
 } from "@/app/_lib/email/resend-client";
 import prisma from "@/app/_lib/db/prisma";
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession();
@@ -41,6 +37,14 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    if (!contactList.audienceId) {
+      return NextResponse.json(
+        { error: "Contact list is not linked to a Resend audience" },
+        { status: 400 }
+      );
+    }
+
     if (contactList.emails.length === 0) {
       return NextResponse.json(
         { error: "Contact list is empty" },
@@ -60,59 +64,35 @@ export async function POST(request: NextRequest) {
     const htmlContent = generateEmailTemplate(emailBody, subject);
     const fromEmail = `${emailConfig.fromName} <${emailConfig.user}>`;
 
-    let successCount = 0;
-    let failedCount = 0;
-    const resendIds: string[] = [];
+    const broadcast = await resend.broadcasts.create({
+      name: `Broadcast-${emailHistory.id}`,
+      audienceId: contactList.audienceId,
+      from: fromEmail,
+      subject,
+      html: htmlContent,
+    });
 
-    for (const recipient of contactList.emails) {
-      try {
-        const { data, error } = await resend.emails.send({
-          from: fromEmail,
-          to: recipient,
-          subject,
-          html: htmlContent,
-          tags: [
-            {
-              name: "emailHistoryId",
-              value: emailHistory.id.toString(),
-            },
-          ],
-        });
-
-        if (error) {
-          console.error(`Failed to send email to ${recipient}:`, error);
-          failedCount++;
-        } else {
-          successCount++;
-          if (data?.id) resendIds.push(data.id);
-        }
-      } catch (err) {
-        console.error(`Error sending to ${recipient}:`, err);
-        failedCount++;
-      }
-
-      await sleep(100);
-    }
+    await resend.broadcasts.send(broadcast.data?.id as string)
 
     await prisma.emailHistory.update({
       where: { id: emailHistory.id },
       data: {
-        sentCount: successCount,
-        failedCount,
-        resendIds,
+        resendIds: [broadcast.data?.id as string],
+        sentCount: contactList.emails.length,
+        failedCount: 0,
       },
     });
 
     return NextResponse.json({
       success: true,
       emailHistoryId: emailHistory.id,
+      broadcastId: broadcast.data?.id as string,
+      audienceId: contactList.audienceId,
       recipientCount: contactList.emails.length,
-      successCount,
-      failedCount,
-      message: `Personalized emails sent: ${successCount} success, ${failedCount} failed`,
+      message: `Broadcast created for ${contactList.emails.length} recipients.`,
     });
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("Error sending broadcast:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
