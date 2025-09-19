@@ -7,6 +7,9 @@ import {
   generateEmailTemplate,
 } from "@/app/_lib/email/resend-client";
 import prisma from "@/app/_lib/db/prisma";
+    function sleep(ms: number) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,25 +60,34 @@ export async function POST(request: NextRequest) {
     const htmlContent = generateEmailTemplate(emailBody, subject);
     const fromEmail = `${emailConfig.fromName} <${emailConfig.user}>`;
 
-    // Send email batch
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to: contactList.emails,
-      subject,
-      html: htmlContent,
-      tags: [
-        {
-          name: " emailHistoryId",
-          value: emailHistory.id,
-        },
-      ],
-    });
 
-    if (error) {
-      console.error("Failed to send bulk email:", error);
+    let failedCount=0
+    for (const email of contactList.emails) {
+      const { data, error } = await resend.emails.send({
+        from: fromEmail,
+        to: email, // send to one email
+        subject,
+        html: htmlContent,
+        tags: [
+          {
+            name: "emailHistoryId", // removed leading space
+            value: emailHistory.id,
+          },
+        ],
+      });
+
+      if (error) {
+       failedCount++
+      }
+
+      // Sleep 600 ms before next send
+      await sleep(600);
+    }
+
+    if (failedCount>0) {
       await prisma.emailHistory.update({
         where: { id: emailHistory.id },
-        data: { failedCount: contactList.emails.length },
+        data: { failedCount },
       });
       return NextResponse.json(
         { error: "Failed to send emails" },
@@ -89,16 +101,13 @@ export async function POST(request: NextRequest) {
         where: { id: emailHistory.id },
         data: {
           sentCount: contactList.emails.length,
-          resendIds: data?.id ? [data.id] : [],
         },
       }),
-    
     ]);
 
     return NextResponse.json({
       success: true,
       emailHistoryId: emailHistory.id,
-      batchId: data?.id,
       recipientCount: contactList.emails.length,
       successCount: contactList.emails.length,
       failedCount: 0,

@@ -11,7 +11,11 @@ export const emailConfig = {
   fromName: process.env.EMAIL_FROM_NAME || "Email Management Platform",
 }
 
-export function generateEmailTemplate(content: string, subject: string, domainName = emailConfig.fromName): string {
+export function generateEmailTemplate(
+  content: string,
+  subject: string,
+  recipientName = "there"
+): string {
   return `
     <!DOCTYPE html>
     <html>
@@ -24,26 +28,19 @@ export function generateEmailTemplate(content: string, subject: string, domainNa
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f1f5f9;
+            background-color: #f1f1f1;
             color: #111827;
           }
           .container {
             max-width: 600px;
-            margin: 0 auto;
-            background: #f8fcff;
-          }
-          .content {
+            margin: 40px auto;
+            background: #ffffff;
             padding: 32px 24px;
-          }
-          .content h1 {
-            margin: 0 0 16px 0;
-            font-size: 20px;
-            font-weight: 600;
-            color: #111827;
+            border-radius: 6px;
           }
           .content p {
             margin: 0 0 16px 0;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.6;
             color: #374151;
           }
@@ -51,30 +48,25 @@ export function generateEmailTemplate(content: string, subject: string, domainNa
             color: #2563eb;
             text-decoration: underline;
           }
-          .footer {
-            background-color: #0080ff;
-            color: #ffffff;
-            text-align: center;
-            padding: 20px;
-            font-size: 13px;
-          }
-          .footer p {
-            margin: 4px 0;
+          .signature {
+            margin-top: 32px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #111827;
           }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="content">
+            <p>Hello ${recipientName},</p>
             ${content}
-          </div>
-          <div class="footer">
-            <p>Brain Decker</p>
-            <p style="font-weight:700">THE WEALTH SOCIETY</p>
+            <p class="signature">COACH JV</p>
           </div>
         </div>
       </body>
     </html>
   `;
 }
+
 
