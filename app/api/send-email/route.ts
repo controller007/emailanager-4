@@ -37,14 +37,6 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
-
-    if (!contactList.audienceId) {
-      return NextResponse.json(
-        { error: "Contact list is not linked to a Resend audience" },
-        { status: 400 }
-      );
-    }
-
     if (contactList.emails.length === 0) {
       return NextResponse.json(
         { error: "Contact list is empty" },
@@ -52,6 +44,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Create email history record
     const emailHistory = await prisma.emailHistory.create({
       data: {
         subject,
@@ -64,36 +57,55 @@ export async function POST(request: NextRequest) {
     const htmlContent = generateEmailTemplate(emailBody, subject);
     const fromEmail = `${emailConfig.fromName} <${emailConfig.user}>`;
 
-    const broadcast = await resend.broadcasts.create({
-      name: `Broadcast-${emailHistory.id}`,
-      audienceId: contactList.audienceId,
+    // Send email batch
+    const { data, error } = await resend.emails.send({
       from: fromEmail,
+      to: contactList.emails,
       subject,
       html: htmlContent,
+      tags: [
+        {
+          name: " emailHistoryId",
+          value: emailHistory.id,
+        },
+      ],
+    });
+
+    if (error) {
+      console.error("Failed to send bulk email:", error);
+      await prisma.emailHistory.update({
+        where: { id: emailHistory.id },
+        data: { failedCount: contactList.emails.length },
+      });
+      return NextResponse.json(
+        { error: "Failed to send emails" },
+        { status: 500 }
+      );
+    }
+
+    // Save recipients + update counts
+    await prisma.$transaction([
+      prisma.emailHistory.update({
+        where: { id: emailHistory.id },
+        data: {
+          sentCount: contactList.emails.length,
+          resendIds: data?.id ? [data.id] : [],
+        },
+      }),
     
-    });
-
-    await resend.broadcasts.send(broadcast.data?.id as string)
-
-    await prisma.emailHistory.update({
-      where: { id: emailHistory.id },
-      data: {
-        broadcastId: broadcast.data?.id as string,
-        sentCount: contactList.emails.length,
-        failedCount: 0,
-      },
-    });
+    ]);
 
     return NextResponse.json({
       success: true,
       emailHistoryId: emailHistory.id,
-      broadcastId: broadcast.data?.id as string,
-      audienceId: contactList.audienceId,
+      batchId: data?.id,
       recipientCount: contactList.emails.length,
-      message: `Broadcast created for ${contactList.emails.length} recipients.`,
+      successCount: contactList.emails.length,
+      failedCount: 0,
+      message: `Email sent to ${contactList.emails.length} recipients`,
     });
   } catch (error) {
-    console.error("Error sending broadcast:", error);
+    console.error("Error sending email:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
