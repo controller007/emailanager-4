@@ -249,7 +249,7 @@ export function EmailDetailDialog({ children, email }: EmailDetailDialogProps) {
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium  text-gray-600">
                       Email Body
                     </label>
                     <div className="mt-2 p-4 border border-gray-200  rounded-lg bg-gray-50 max-h-96 overflow-y-auto">
