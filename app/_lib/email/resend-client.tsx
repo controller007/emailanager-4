@@ -60,7 +60,7 @@ export function generateEmailTemplate(
         <div class="container">
           <div class="content">
             ${content}
-            <p class="signature">COACH JV</p>
+            <p class="signature">Coach JV</p>
           </div>
         </div>
       </body>
