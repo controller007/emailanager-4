@@ -59,7 +59,6 @@ export function generateEmailTemplate(
       <body>
         <div class="container">
           <div class="content">
-            <p>Hello ${recipientName},</p>
             ${content}
             <p class="signature">COACH JV</p>
           </div>
