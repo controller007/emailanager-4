@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json({ error: "Contact list not found" }, { status: 404 });
   }
 
-  let audienceId = existingList.audienceId;
+  let audienceId = existingList.audienceId as string;
 
   // // If no audience in Resend yet, create one
   // if (!audienceId) {
@@ -49,30 +49,30 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   // }
 
   // 1. Fetch existing contacts in this audience
-  // const existingContactsRes = await resend.contacts.list({ audienceId });
-  // const existingEmails = existingContactsRes.data?.data?.map((c: any) => c.email) || [];
+  const existingContactsRes = await resend.contacts.list({ audienceId });
+  const existingEmails = existingContactsRes.data?.data?.map((c: any) => c.email) || [];
 
-  // const toAdd = emails.filter((e: string) => !existingEmails.includes(e));
+  const toAdd = emails.filter((e: string) => !existingEmails.includes(e));
 
-  // const toRemove = existingEmails.filter((e: string) => !emails.includes(e));
+  const toRemove = existingEmails.filter((e: string) => !emails.includes(e));
 
-  // for (const email of toAdd) {
-  //   try {
-  //     await resend.contacts.create({ email, audienceId });
-  //     await sleep(600); 
-  //   } catch (err) {
-  //     console.error(`Error adding ${email}:`, err);
-  //   }
-  // }
+  for (const email of toAdd) {
+    try {
+      await resend.contacts.create({ email, audienceId });
+      await sleep(600); 
+    } catch (err) {
+      console.error(`Error adding ${email}:`, err);
+    }
+  }
 
-  // for (const email of toRemove) {
-  //   try {
-  //     await resend.contacts.remove({ email, audienceId });
-  //     await sleep(600);
-  //   } catch (err) {
-  //     console.error(`Error removing ${email}:`, err);
-  //   }
-  // }
+  for (const email of toRemove) {
+    try {
+      await resend.contacts.remove({ email, audienceId });
+      await sleep(600);
+    } catch (err) {
+      console.error(`Error removing ${email}:`, err);
+    }
+  }
 
   const updatedContactList = await prisma.contactList.update({
     where: { id: params.id },

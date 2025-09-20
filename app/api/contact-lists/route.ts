@@ -28,37 +28,38 @@ export async function POST(request: NextRequest) {
     const { name, emails } = validationResult.data;
 
     // 1. Create Audience in Resend
-    // const audience = await resend.audiences.create({
-    //   name,
-    // });
+    const audience = await resend.audiences.create({
+      name,
+    });
 
-    // console.log(audience);
+    console.log(audience);
 
-    // for (const email of emails) {
-    //   try {
-    //     const res = await resend.contacts.create({
-    //       email,
-    //       audienceId: audience.data?.id as string,
-    //     });
+    for (const email of emails) {
+      try {
+        const res = await resend.contacts.create({
+          email,
+          audienceId: audience.data?.id as string,
+        });
 
-    //     if (res.error) {
-    //       console.error(`Failed to add ${email}:`, res.error);
-    //     } else {
-    //       console.log(`Added ${email} to audience ${audience.data?.id}`);
-    //     }
+        if (res.error) {
+          console.error(`Failed to add ${email}:`, res.error);
+        } else {
+          console.log(`Added ${email} to audience ${audience.data?.id}`);
+        }
 
-    //     // Wait 600ms between requests to stay under 2/sec
-    //     await sleep(600);
-    //   } catch (err) {
-    //     console.error(`Error adding ${email}:`, err);
-    //   }
-    // }
+        // Wait 600ms between requests to stay under 2/sec
+        await sleep(600);
+      } catch (err) {
+        console.error(`Error adding ${email}:`, err);
+      }
+    }
 
     const contactList = await prisma.contactList.create({
       data: {
         name,
         emails,
         createdBy: session.user.id,
+        audienceId: audience.data?.id as string,
       },
     });
 
