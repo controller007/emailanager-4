@@ -59,8 +59,18 @@ model EmailHistory {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  contactList ContactList @relation(fields: [contactListId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contactList     ContactList           @relation(fields: [contactListId], references: [id], onDelete: Cascade)
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipientEvents EmailRecipientEvent[]
 
   @@map("email_history")
+}
+
+model EmailRecipientEvent {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  emailHistoryId String       @db.ObjectId
+  emailHistory   EmailHistory @relation(fields: [emailHistoryId], references: [id])
+  recipientEmail String
+  status         String 
+  createdAt      DateTime     @default(now())
 }

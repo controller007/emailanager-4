@@ -64,12 +64,12 @@ export function EmailHistoryFilters() {
           />
         </div>
         <Button type="submit" variant="outline">
-          Search
+          Search  
         </Button>
       </form>
 
       <div className="flex gap-2">
-        <Select
+        {/* <Select
           value={status}
           onValueChange={(value) => {
             setStatus(value)
@@ -86,7 +86,7 @@ export function EmailHistoryFilters() {
             <SelectItem value="delivered">Delivered</SelectItem>
             <SelectItem value="failed">Failed</SelectItem>
           </SelectContent>
-        </Select>
+        </Select> */}
 
         {hasActiveFilters && (
           <Button variant="outline" size="icon" onClick={clearFilters}>
