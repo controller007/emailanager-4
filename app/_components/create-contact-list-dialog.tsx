@@ -100,14 +100,18 @@ export function CreateContactListDialog({ children }: CreateContactListDialogPro
     validateEmailFormats(value)
   }
 
-  const removeInvalidEmail = (emailToRemove: string) => {
-    const emails = parseEmails(emailsInput)
-    const updatedEmails = emails.filter((email) => email !== emailToRemove)
-    const updatedInput = updatedEmails.join(", ")
+const removeInvalidEmail = (emailToRemove: string) => {
+  // Remove only from invalidEmails
+  setInvalidEmails((prev) => prev.filter((email) => email !== emailToRemove))
 
-    setEmailsInput(updatedInput)
-    // validateEmailFormats(updatedInput)
-  }
+  // Also update the textarea text to drop it
+  const emails = parseEmails(emailsInput)
+  const updatedEmails = emails.filter((email) => email !== emailToRemove)
+  setEmailsInput(updatedEmails.join(", "))
+
+  // ✅ Do NOT call validateEmailFormats here, so we don't reset results
+}
+
 
   // Server action to validate emails with MX records
   const validateEmailsWithMX = async () => {
