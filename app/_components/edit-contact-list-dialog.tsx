@@ -83,7 +83,7 @@ export function EditContactListDialog({ children, contactList }: EditContactList
       .join(", ")
 
     setEmailsInput(updatedInput)
-    validateEmails(updatedInput)
+    // validateEmails(updatedInput)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

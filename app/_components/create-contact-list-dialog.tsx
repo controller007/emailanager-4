@@ -106,7 +106,7 @@ export function CreateContactListDialog({ children }: CreateContactListDialogPro
     const updatedInput = updatedEmails.join(", ")
 
     setEmailsInput(updatedInput)
-    validateEmailFormats(updatedInput)
+    // validateEmailFormats(updatedInput)
   }
 
   // Server action to validate emails with MX records
