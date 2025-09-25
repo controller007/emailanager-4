@@ -4,14 +4,14 @@ import { contactListSchema } from "@/app/_lib/validations/email";
 import prisma from "@/app/_lib/db/prisma";
 import { resend } from "@/app/_lib/email/resend-client";
 
-
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-
-
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const session = await getSession();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,7 +34,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   });
 
   if (!existingList) {
-    return NextResponse.json({ error: "Contact list not found" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Contact list not found" },
+      { status: 404 }
+    );
   }
 
   let audienceId = existingList.audienceId as string;
@@ -50,7 +53,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
   // 1. Fetch existing contacts in this audience
   const existingContactsRes = await resend.contacts.list({ audienceId });
-  const existingEmails = existingContactsRes.data?.data?.map((c: any) => c.email) || [];
+  const existingEmails =
+    existingContactsRes.data?.data?.map((c: any) => c.email) || [];
 
   const toAdd = emails.filter((e: string) => !existingEmails.includes(e));
 
@@ -59,7 +63,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   for (const email of toAdd) {
     try {
       await resend.contacts.create({ email, audienceId });
-      await sleep(600); 
+      await sleep(600);
     } catch (err) {
       console.error(`Error adding ${email}:`, err);
     }
@@ -81,7 +85,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
   return NextResponse.json(updatedContactList);
 }
-
 
 export async function DELETE(
   request: NextRequest,
@@ -115,8 +118,22 @@ export async function DELETE(
       }
     }
 
-    await prisma.contactList.delete({
-      where: { id: params.id },
+    await prisma.$transaction(async (tx) => {
+      await tx.emailRecipientEvent.deleteMany({
+        where: {
+          emailHistory: {
+            contactListId: params.id,
+          },
+        },
+      });
+
+      await tx.emailHistory.deleteMany({
+        where: { contactListId:params.id },
+      });
+
+      await tx.contactList.delete({
+        where: { id: params.id },
+      });
     });
 
     return NextResponse.json({ success: true });
