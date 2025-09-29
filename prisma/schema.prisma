@@ -33,7 +33,7 @@
     id              String   @id @default(auto()) @map("_id") @db.ObjectId
     name            String
     emails          String[]
-    totalEmails     Int
+    totalEmails     Int @default(0)
     processedEmails Int      @default(0)
     status          String   @default("pending")
     audienceId      String?
