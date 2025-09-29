@@ -27,11 +27,11 @@ export function ContactListsGrid({ contactLists }: ContactListsGridProps) {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold text-gray-900 truncate">{list.name}</CardTitle>
               <div className="flex items-center space-x-1">
-                <EditContactListDialog contactList={list}>
+                {/* <EditContactListDialog contactList={list}>
                   <Button variant="ghost" size="sm">
                     <Edit className="h-4 w-4" />
                   </Button>
-                </EditContactListDialog>
+                </EditContactListDialog> */}
                 <DeleteContactListDialog contactList={list}>
                   <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
                     <Trash2 className="h-4 w-4" />

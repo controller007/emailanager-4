@@ -1,76 +1,79 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+  // This is your Prisma schema file,
+  // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-generator client {
-  provider = "prisma-client-js"
-}
+  generator client {
+    provider = "prisma-client-js"
+  }
 
-datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
-}
+  datasource db {
+    provider = "mongodb"
+    url      = env("DATABASE_URL")
+  }
 
-model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
-  username  String?  @unique
-  password  String
-  firstName String?
-  lastName  String?
-  image     String?
-  blocked   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  model User {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    email     String   @unique
+    username  String?  @unique
+    password  String
+    firstName String?
+    lastName  String?
+    image     String?
+    blocked   Boolean  @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  // Relations
-  contactLists ContactList[]
-  emailHistory EmailHistory[]
+    // Relations
+    contactLists ContactList[]
+    emailHistory EmailHistory[]
 
-  @@map("users")
-}
+    @@map("users")
+  }
 
-model ContactList {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  name       String
-  emails     String[]
-  audienceId String?
-  createdBy  String   @db.ObjectId
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  model ContactList {
+    id              String   @id @default(auto()) @map("_id") @db.ObjectId
+    name            String
+    emails          String[]
+    totalEmails     Int
+    processedEmails Int      @default(0)
+    status          String   @default("pending")
+    audienceId      String?
+    createdBy       String   @db.ObjectId
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
 
-  // Relations
-  user         User           @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  emailHistory EmailHistory[]
+    // Relations
+    user         User           @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+    emailHistory EmailHistory[]
 
-  @@map("contact_lists")
-}
+    @@map("contact_lists")
+  }
 
-model EmailHistory {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  subject        String
-  body           String
-  contactListId  String   @db.ObjectId
-  userId         String   @db.ObjectId
-  broadcastId    String?
-  sentCount      Int      @default(0)
-  deliveredCount Int      @default(0)
-  openedCount    Int      @default(0)
-  failedCount    Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  model EmailHistory {
+    id             String   @id @default(auto()) @map("_id") @db.ObjectId
+    subject        String
+    body           String
+    contactListId  String   @db.ObjectId
+    userId         String   @db.ObjectId
+    broadcastId    String?
+    sentCount      Int      @default(0)
+    deliveredCount Int      @default(0)
+    openedCount    Int      @default(0)
+    failedCount    Int      @default(0)
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
 
-  contactList     ContactList           @relation(fields: [contactListId], references: [id], onDelete: Cascade)
-  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipientEvents EmailRecipientEvent[]
+    contactList     ContactList           @relation(fields: [contactListId], references: [id], onDelete: Cascade)
+    user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+    recipientEvents EmailRecipientEvent[]
 
-  @@map("email_history")
-}
+    @@map("email_history")
+  }
 
-model EmailRecipientEvent {
-  id             String       @id @default(auto()) @map("_id") @db.ObjectId
-  emailHistoryId String       @db.ObjectId
-  emailHistory   EmailHistory @relation(fields: [emailHistoryId], references: [id])
-  recipientEmail String
-  status         String 
-  createdAt      DateTime     @default(now())
-}
+  model EmailRecipientEvent {
+    id             String       @id @default(auto()) @map("_id") @db.ObjectId
+    emailHistoryId String       @db.ObjectId
+    emailHistory   EmailHistory @relation(fields: [emailHistoryId], references: [id])
+    recipientEmail String
+    status         String
+    createdAt      DateTime     @default(now())
+  }
