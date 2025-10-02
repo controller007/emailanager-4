@@ -20,6 +20,7 @@ async function getContactLists(userId: string) {
       emails: {
         isEmpty: false,
       },
+      status: "completed",
     },
     orderBy: { createdAt: "desc" },
     select: {
