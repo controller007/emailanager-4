@@ -38,9 +38,23 @@ jobs:
           git remote add target2 https://x-access-token:${TOKEN}@github.com/controller007/emailmanager-5.git
           git push target2 main --force
 
-      - name: Push to emailmanager-4
+      - name: Push to emailanager-4
         env:
           TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-          git remote add target3 https://x-access-token:${TOKEN}@github.com/controller007/emailmanager-4.git
+          git remote add target3 https://x-access-token:${TOKEN}@github.com/controller007/emailanager-4.git
+          git push target3 main --force
+
+      - name: Push to emailanager-3
+        env:
+          TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          git remote add target3 https://x-access-token:${TOKEN}@github.com/controller007/emailanager-3.git
+          git push target3 main --force
+
+      - name: Push to emailanager-1
+        env:
+          TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          git remote add target3 https://x-access-token:${TOKEN}@github.com/controller007/emailmanager.git
           git push target3 main --force
