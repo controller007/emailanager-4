@@ -1,0 +1,36 @@
+name: Sync Template Updates
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout template
+        uses: actions/checkout@v4
+
+      - name: Push to child repo
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          repository: controller007/emailmanaager-6
+          branch: main
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          force: true
+      - name: Push to child repo
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          repository: controller007/emailmanaager-5
+          branch: main
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          force: true
+      - name: Push to child repo
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          repository: controller007/emailmanaager-4
+          branch: main
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          force: true
