@@ -12,25 +12,29 @@ jobs:
     steps:
       - name: Checkout template
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
 
-      - name: Push to child repo
+      - name: Push to emailmanager-6
         uses: ad-m/github-push-action@v0.6.0
         with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: controller007/emailmanager-6
           branch: main
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           force: true
-      - name: Push to child repo
+
+      - name: Push to emailmanager-5
         uses: ad-m/github-push-action@v0.6.0
         with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: controller007/emailmanager-5
           branch: main
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           force: true
-      - name: Push to child repo
+
+      - name: Push to emailmanager-4
         uses: ad-m/github-push-action@v0.6.0
         with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: controller007/emailmanager-4
           branch: main
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           force: true
