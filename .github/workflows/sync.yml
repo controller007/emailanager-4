@@ -16,7 +16,7 @@ jobs:
       - name: Checkout template repo
         uses: actions/checkout@v4
         with:
-          persist-credentials: false  # prevent GitHub Actions bot credentials
+          persist-credentials: false 
           fetch-depth: 0
 
       - name: Setup Git user
@@ -49,12 +49,12 @@ jobs:
         env:
           TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-          git remote add target3 https://x-access-token:${TOKEN}@github.com/controller007/emailanager-3.git
-          git push target3 main --force
+          git remote add target h4ttps://x-access-token:${TOKEN}@github.com/controller007/emailanager-3.git
+          git push target4 main --force
 
       - name: Push to emailanager-1
         env:
           TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-          git remote add target3 https://x-access-token:${TOKEN}@github.com/controller007/emailmanager.git
-          git push target3 main --force
+          git remote add target5 https://x-access-token:${TOKEN}@github.com/controller007/emailmanager.git
+          git push target5 main --force
