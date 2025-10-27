@@ -3,6 +3,7 @@ import {Poppins} from "next/font/google"
 import './globals.css'
 import './editor.css'
 import Loader from './_components/loader'
+import { Toaster } from './_components/ui/sonner'
 
 export const metadata: Metadata = {
   title: 'Email Manager',
@@ -22,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.className}`}>
+        <Toaster/>
         <Loader/>
         {children}
       </body>
